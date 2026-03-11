@@ -33,44 +33,28 @@ Transitive dependency:
 Empno -> Deptcode -> Deptlocation
 
 Note:
-The sample data has an inconsistency for `Deptcode=1C` (`Pointe-a-Pitre` vs `Changhua`), therefore it will be treated as a data quality issue in the denormalized source, not as a valid business rule.
+The sample data has an inconsistency for `Deptcode=1C` (`Pointe-a-Pitre` vs `Changhua`), therefore it can be treated as a data quality issue in the denormalized source, not as a valid business rule.
 
 ## 4. Step-by-step normalization
 
 ## Step A: 1NF
 
 Overview:
-All values are atomic, because there are not repeated groups, therefore the table is already in 1NF.
+All values are atomic, because there are not repeated groups, thus the table is already in 1NF.
 
 Current relation:
-R (<u>Empno</u>, Deptcode, Deptlocation, Name, Job, Hiredate, Salary)
+Empno -> (Name, Job, Hiredate, Salary, Deptcode, Deptlocation)
 
-Redundant department location data.
+There's Redundant department location data with  no data quality rules applied.
 
 ## Step B: 2NF
 
-Condition:
-- No partial dependency of non-key attributes on part of a composite key.
+There's a Transitive dependency through `Deptcode`.
 
-Analysis:
-- The key is a single attribute (`Empno`), so partial dependencies cannot exist.
+`Empno` is the primary key.
 
-Result:
-- The relation remains unchanged and is in 2NF.
-
-Current relation:
-R (<u>Empno</u>, Deptcode, Deptlocation, Name, Job, Hiredate, Salary)
-
-Problem still present:
-- Transitive dependency through `Deptcode`.
 
 ## Step C: 3NF
-
-Condition:
-- No transitive dependency from key to non-key attributes through another non-key attribute.
-
-Violation found:
-- `Empno -> Deptcode` and `Deptcode -> Deptlocation`
 
 Decomposition:
 
@@ -78,18 +62,15 @@ EMPLOYEE (<u>Empno</u>, Name, Job, Hiredate, Salary, *Deptcode*)
 
 DEPARTMENT (<u>Deptcode</u>, Deptlocation)
 
-Why this fixes it:
-- `Deptlocation` is stored once per department.
-- Employee rows keep only `Deptcode` as a reference.
-- Update, insert, and delete anomalies for department location are removed.
+By diving it:
+`Deptlocation` is stored once per department.
+Employee rows keep only `Deptcode` as a reference.
 
 ## 5. Relationships
 
-DEPARTMENT (<u>Deptcode</u>, Deptlocation)
+Empno -> (Name, Job, Hiredate, Salary, Deptcode (in italics))
 
-EMPLOYEE (<u>Empno</u>, Name, Job, Hiredate, Salary, *Deptcode*)
-
-*Deptcode* references DEPARTMENT(<u>Deptcode</u>)
+Deptcode -> (Deptlocation)
 
 ## 6. Proposed SQL schema (3NF)
 
